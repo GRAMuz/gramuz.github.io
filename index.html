@@ -107,7 +107,9 @@ const T0=[
  u:["Hozirgi zamonda maslahat (should)|You should start your own business.","Sifatli birikma: It’s + sifat + that + S + should + V1|It’s important that you should learn English.","Fe’lli birikma: S + verb + that + S + should + V1|My mom demands that we should clean these rooms.","If = should (agar)|If you should come us today, we will go fishing.","Had better — faqat present, yozishmada|You had better not go there.","Ought to — rasmiy nutqda, hujjatlarda|Residents ought to pass their taxes by October.","To be supposed to — kutilma|You were supposed to be here already."]},
 {n:"Future Continuous",lv:"B1",d:"Kelasi davomiy zamon",subj:1,
  f:["(+) darak|S + will/shall + be + Ving|He will be sleeping at 8 tomorrow.","(−) inkor|S + will/shall + not + be + Ving|I won’t be working.","(?) savol|Will/Shall + S + be + Ving?|Will you be working?"],
- u:["Kelasi zamonda aniq bir paytda davom qilayotgan ish|He will be sleeping at 8 tomorrow.","Kelasi zamondagi reja uchun|I’ll be working in the garden at 10 tomorrow."]},
+ u:["Kelasi zamondagi aniq bir paytda davom qilayotgan ishlar uchun|He will be sleeping at 8 tomorrow.","Kelasi zamon rejali ishlar uchun|I’ll be working in the garden at 10 tomorrow."],
+ p:["at this time, at + vaqt, next + vaqt, tomorrow|S + will/shall + be + Ving + Signal Words|He will be sleeping at this time tomorrow."],
+ s:"shu vaqtda=at this time;… da (aniq soat)=at;keyingi (hafta, oy, yil)=next;ertaga=tomorrow"},
 {n:"May / Might",lv:"B1",d:"Ehtimol va ruxsat",
  f:["(+) may|S + may + V1|I may fail at the exam.","(+) might|S + might + V1|He might come.","(+) may be Ving|S + may be + Ving|They may be repairing their house.","(+) may/might as well|S + may/might as well + V1|I may as well sleep now."],
  u:["May — mumkin (hozirgi zamonda sodir bo’lishi mumkin)|I may fail at the exam.","May — taxmin|We’ve invited Tom. He may come.","May — ruxsat (= to be allowed/permitted to)|May I take your order, please?","Might — o’tgan zamonda mumkin edi|He might prepare his homework yesterday.","Might — hozirgi zamonda o’pka-gina iltimos|You might help me with the questions.","Might perfective: S + might have + V3|You might have invited Tom to the party."]},
@@ -196,8 +198,16 @@ const $=id=>document.getElementById(id),pick=a=>a[Math.floor(Math.random()*a.len
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=x=>String(x).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const strip=h=>h.replace(/<br>/g," ").replace(/<[^>]+>/g,"");
-const norm=a=>a.toLowerCase().replace(/[’`ʻ‘]/g,"'").replace(/\s+/g," ").trim();
-const full=a=>norm(a).replace(/won't/g,"will not").replace(/can't/g,"can not").replace(/n't/g," not").replace(/'m/g," am").replace(/'re/g," are").replace(/'ll/g," will").replace(/'ve/g," have").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const norm=a=>a.toLowerCase().replace(/[’‘ʼʻ´`′‛＇]/g,"'").replace(/\s+/g," ").trim();
+const PRN="he|she|it|that|there|here|what|who|where|how|when|why";
+const expand=a=>norm(a).replace(/won't/g,"will not").replace(/shan't/g,"shall not").replace(/can't|\bcannot\b/g,"can not").replace(/n't/g," not").replace(/'m\b/g," am").replace(/'re\b/g," are").replace(/'ll\b/g," will").replace(/'ve\b/g," have").replace(/\blet's\b/g,"let us");
+const clean=x=>x.replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const full=a=>clean(expand(a).replace(new RegExp("\\b("+PRN+")'s\\b","g"),"$1 is").replace(/'d\b/g," would"));
+function vars(a){const s=expand(a),R=new RegExp("\\b("+PRN+")'s\\b","g");let o=[s];
+ if(new RegExp("\\b("+PRN+")'s\\b").test(s))o=[s.replace(R,"$1 is"),s.replace(R,"$1 has")];
+ if(/'d\b/.test(s))o=o.flatMap(x=>[x.replace(/'d\b/g," would"),x.replace(/'d\b/g," had")]);
+ return o.map(clean)}
+const same=(a,b)=>{const B=vars(b);return vars(a).some(x=>B.includes(x))};
 /* ---------- saqlash ---------- */
 const LS="gm_hist_v2";let H=[],dbDoc=null,tm=0,dbOn=false;
 try{H=JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){}
@@ -280,7 +290,7 @@ function open(i){LEX="g";ti=T[i];ti.key="t"+ti.id;sess();$("tbs").classList.togg
  $(p+"chk").onclick=async()=>{
   const a=$(p+"ans").value.trim();if(!a||busy)return;const s=S[p],q=s.q[s.i];busy=true;$(p+"chk").disabled=true;$(p+"res").className="res";$(p+"res").textContent="Tekshirilmoqda…";
   let r,ref;
-  if(p==="m"){ref="To’g’ri gap: "+q.ans;if(full(a)===full(q.ans))r={ok:true,reason:"",fix:q.ans};else{r=await grade(q,a);if(r.loc)r={ok:false,reason:"So’zlar tartibi noto’g’ri.",fix:""};else r.fix=""}}
+  if(p==="m"){ref="To’g’ri gap: "+q.ans;if(same(a,q.ans))r={ok:true,reason:"",fix:q.ans};else{r=await grade(q,a);if(r.loc)r={ok:false,reason:"So’zlar tartibi noto’g’ri.",fix:""};else r.fix=""}}
   else if(p==="q"){ref="To’g’ri javob: "+q.ans+" — "+q.ex;r={ok:norm(a)===norm(q.ans),reason:"",fix:""}}
   else if(p==="g"){const key=full(a);ref=`${q.c?"":"Formula: "}Namuna: ${q.ex}`;
    if(used.has(key))r={ok:false,reason:"Bu gapni oldin ishlatgansiz — xato!",fix:""};else r=await grade(q,a);used.add(key)}
@@ -358,7 +368,7 @@ async function showRank(){go("rank");const R=$("rk");
  if(!ME||!ME.on){R.innerHTML=`<div class="card">Reyting faqat internet va hisob bilan kirganda ko’rinadi.</div>`;return}
  R.innerHTML=`<div class="card">Yuklanmoqda…</div>`;
  try{const L=await lbGet(),me=L.findIndex(x=>x.id===UID);
-  R.innerHTML=`<div class="card"><h2>🏆 Reyting</h2><div class="sub">${me>=0?`Siz <b>${me+1}-o’rindasiz</b> (${L.length} ishtirokchidan) · ${ME.sc} ball`:"Reytingda hali yo’qsiz"}</div><div class="sub">1 ta mavzuning 1-urinishda to’g’ri javob +1, 2-urinishda +0.5, 3 va undan keyin 0 ball; har xato −1 ball.</div><div class="sc"><table><tr><th>#</th><th>Ism</th><th>✅</th><th>❌</th><th>Ball</th></tr>${L.map((x,i)=>`<tr${x.id===UID?` style="font-weight:700;color:var(--ac)"`:""}><td>${i+1}</td><td>${esc(x.name||"?")}</td><td>${x.c||0}</td><td>${x.w||0}</td><td>${fmt(x.sc||0)}</td></tr>`).join("")}</table></div><button id="rf" style="margin-top:10px;width:100%">🔄 Yangilash</button></div>`;$("rf").onclick=showRank}
+  R.innerHTML=`<div class="card"><h2>🏆 Reyting</h2><div class="sub">${me>=0?`Siz <b>${me+1}-o’rindasiz</b> (${L.length} ishtirokchidan) · ${ME.sc} ball · ${(ME.c||0)+(ME.w||0)} mashq`:"Reytingda hali yo’qsiz"}</div><div class="sub">1 ta mavzuning 1-urinishda to’g’ri javob +1, 2-urinishda +0.5, 3 va undan keyin 0 ball; har xato −1 ball. “Mashq” — javob berilgan savollar soni (to’g’ri + xato).</div><div class="sc"><table><tr><th>#</th><th>Ism</th><th>Mashq</th><th>✅</th><th>❌</th><th>Ball</th></tr>${L.map((x,i)=>`<tr${x.id===UID?` style="font-weight:700;color:var(--ac)"`:""}><td>${i+1}</td><td>${esc(x.name||"?")}</td><td>${(x.c||0)+(x.w||0)}</td><td>${x.c||0}</td><td>${x.w||0}</td><td>${fmt(x.sc||0)}</td></tr>`).join("")}</table></div><button id="rf" style="margin-top:10px;width:100%">🔄 Yangilash</button></div>`;$("rf").onclick=showRank}
  catch(e){R.innerHTML=`<div class="card">Reytingni yuklab bo’lmadi.</div>`}}
 $("rkb").onclick=()=>nav("");
 async function boot(){showGate();let sv=null;try{sv=JSON.parse(localStorage.getItem(MK)||"null")}catch(e){}
