@@ -127,8 +127,10 @@ const T0=[
  s:"… dan beri (boshlangan vaqt bilan)=since;… dan beri (oraliq vaqt bilan)=for"},
 {n:"Past Perfect Simple",lv:"B1",d:"O’tgan tugallangan oddiy zamon",subj:1,
  f:["(+) darak|S + had + V3|I had finished my homework.","(−) inkor|S + had not + V3|I had not finished it.","(?) savol|Had + S + V3?|Had you finished it?"],
- u:["O’tgan zamonda aniq bir paytgacha sodir bo’lib tugagan ish|I had finished my homework by 5 p.m.","when / by the time + Past Simple, Past Perfect|By the time I arrived, the film had started.","when / after + Past Perfect, Past Simple|After I had eaten, I went out.","Hardly/Barely/Scarcely … when; No sooner … than|I had hardly got home when it started to rain."],
- s:"… ga qadar=by the time;… dan keyin=after;zo’rg’a=hardly/barely/scarcely"},
+ r:["before — oldin: S + had + V3 + before + S + V2","by the time — gacha: By the time + S + V2, S + had + V3","when / after — keyin: S + V2 + when/after + S + had + V3","S + had + hardly/barely/scarcely + V3 + when + S + V2","No sooner + had + S + V3 + than + S + V2","had not = hadn’t"],
+ u:["O’tgan zamonda bo’lgan ishdan ham oldin bo’lgan ish|I had finished my homework by 5 p.m.","before — oldin; by the time — gacha: S + had + V3 + before + S + V2|He had left before I came.","when / after — keyin: S + V2 + when/after + S + had + V3|She cleaned outside after the rain had stopped.","hardly / barely / scarcely: S + had + hardly/barely/scarcely + V3 + when + S + V2|I had hardly got home when it started to rain.","No sooner … than: No sooner + had + S + V3 + than + S + V2|No sooner had I gone out than it started to rain."],
+ p:["by + vaqt, yesterday|S + had + V3 + by + vaqt|I had finished my homework by 5 p.m.","before|S + had + V3 + before + S + V2|He had left before I came.","by the time|By the time + S + V2, S + had + V3|By the time I arrived, the film had started.","after, when|S + V2 + after/when + S + had + V3|She cleaned outside after the rain had stopped.","hardly, barely, scarcely|S + had + hardly/barely/scarcely + V3 + when + S + V2|I had hardly got home when it started to rain."],
+ s:"… dan oldin=before=X;… gacha (… ga kelib)=by the time=X;… dan keyin=after=X;… ganda (… dan keyin)=when=X;zo’rg’a=hardly/barely/scarcely=X;… gacha (aniq vaqt)=by=X;kechagacha=by yesterday/yesterday=X"},
 {n:"So / Neither",lv:"B1",d:"Men ham (so’zlashuv)",
  f:["(+) So|1-gap. So + yordamchi fe’l + S|I ate enough at the party. So did I.","(−) Neither|1-gap. Neither + yordamchi fe’l + S|I don’t like an ice-cream. Neither do I."]},
 {n:"Relative Clause",lv:"B1",d:"Gapdagi ma’lum bo’lakni izohlovchi qo’shma gap",
@@ -218,7 +220,7 @@ async function initDb(){try{if(!window.claude)return;const db=await claude.use("
  dbDoc=db.collection("data/users/"+id).doc("history");const s=await dbDoc.get();if(s.exists&&s.data().h)merge(s.data().h);dbOn=true;persist();renderHome();if(!$("results").classList.contains("hide"))showRes()}catch(e){}}
 /* ---------- savollar ---------- */
 const per=t=>t.f.length+t.u.length<=8?2:1;
-function okSg(g,lb){const e=g.en[0];if(lb.startsWith("Bog")&&g.k!=="B")return false;if(g.k==="B"&&!lb.startsWith("Bog"))return false;if(g.k==="+"&&!lb.includes("(+)"))return false;if(g.k==="S"&&!lb.startsWith("Present Simple"))return false;if(g.k==="C"&&!lb.startsWith("Present Continuous"))return false;if(/used to/.test(lb))return false;if(e==="never")return lb.includes("(+)");if(e==="ever")return lb.includes("(?)");if(e==="yet")return !lb.includes("(+)");return true}
+function okSg(g,lb){const e=g.en[0];if(g.k==="X")return false;if(lb.startsWith("Bog")&&g.k!=="B")return false;if(g.k==="B"&&!lb.startsWith("Bog"))return false;if(g.k==="+"&&!lb.includes("(+)"))return false;if(g.k==="S"&&!lb.startsWith("Present Simple"))return false;if(g.k==="C"&&!lb.startsWith("Present Continuous"))return false;if(/used to/.test(lb))return false;if(e==="never")return lb.includes("(+)");if(e==="ever")return lb.includes("(?)");if(e==="yet")return !lb.includes("(+)");return true}
 function mkF(t,x,av){const [lb,fm,ex]=x.split("|"),o={tag:t.n+" · "+lb,task:lb+": "+fm,ex:ex||fm,f:fm};let h=`<b>${lb}</b><br><code>${fm}</code><br>Shu formula bilan gap tuzing.`;
  if(t.subj){const s=pick(SUB);o.s=s[0];h+=`<br>Ega: <b>${s[1]}</b>`}
  if(t.sg.length){let a=t.sg.filter(g=>okSg(g,lb)&&g.uz!==av);if(!a.length)a=t.sg.filter(g=>okSg(g,lb));if(a.length){const g=pick(a);o.g=g.en;o.gu=g.uz;h+=`<br>Signal: <b>${g.uz}</b>`}}
@@ -326,7 +328,7 @@ function showRes(){go("results");const R=H.filter(x=>x.c+x.w>0).slice().reverse(
 $("bk").onclick=()=>nav("");$("rb").onclick=()=>nav("");$("mb").onclick=()=>nav("");
 document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>nav("t-"+b.dataset.t));$("tex").onclick=()=>nav("t-"+LEX);
 /* ---------- hisob va reyting ---------- */
-const TOPN=["Present Simple","Present Continuous",NEWN,"Past Simple","Past Continuous","Future Simple","Future Continuous","Going to","Present Perfect Simple","Present Perfect Continuous","How long"];
+const TOPN=["Present Simple","Present Continuous",NEWN,"Past Simple","Past Continuous","Future Simple","Future Continuous","Going to","Present Perfect Simple","Present Perfect Continuous","Past Perfect Simple","How long"];
 const HL=()=>[...TOPN.map(n=>T.find(t=>t.n===n)),...ORD.flatMap(l=>T.filter(t=>t.lv===l&&!TOPN.includes(t.n)))];
 let ME=null,GATE=false,DBS=null,UID=null,MT=0;const MK="gm_me";
 const ONL=()=>!!(ME&&ME.on&&navigator.onLine);const fmt=x=>Math.round(x*10)/10;
