@@ -86,3 +86,4 @@ O‘rganing, mashq qiling va rivojlaning!
   © Gramuz. All rights reserved.
 </p>
 
+https://github.com/GRAMuz/gramuz.github.io/blob/979f7d9d8aeb65a66d063a8637456242cd347988/logo.png
